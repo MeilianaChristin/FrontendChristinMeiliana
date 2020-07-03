@@ -1,31 +1,34 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Container} from 'native-base';
+import {Container, Fab, Icon, Item, Input, Button} from 'native-base';
 import {View, RefreshControl, Text, Image, ScrollView} from 'react-native';
 import CommonHeader from '../../components/CommonHeader';
 import {Card, Avatar} from 'react-native-paper';
-import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import {connect} from 'react-redux';
 import {findAll} from '../../actions/contact';
 import styles from './style';
 
-function Contact({onPress, contact}) {
+function Contact({onPress, item}) {
+  let photo = item.photo;
+  if (photo == 'N/A') {
+    photo = 'https://www.freeiconspng.com/uploads/no-image-icon-0.png';
+  }
   return (
     <View>
-      <Card style={styles.card}>
+      <Card style={styles.card} onPress={() => onPress(item)}>
         <View style={styles.view}>
           <Avatar.Image
             source={{
-              uri: '{contact.photo}',
+              uri: photo,
             }}
             style={styles.avatar}
-            size={80}
+            size={60}
           />
 
           <View style={styles.viewName}>
-            <Text style={styles.text}>{contact.firstName}</Text>
-            <Text style={styles.text}>{contact.lastName}</Text>
+            <Text style={styles.text}>{item.firstName}</Text>
+            <Text style={styles.text}>{item.lastName}</Text>
           </View>
         </View>
       </Card>
@@ -39,6 +42,12 @@ class ContactScreen extends Component {
 
     this.state = {
       data: [],
+      search: '',
+      params: {
+        sort: 'asc',
+        page: 0,
+        search: '',
+      },
     };
   }
 
@@ -51,61 +60,83 @@ class ContactScreen extends Component {
     console.log('data', data);
 
     if (prevProps.data !== data) {
-      this.setState({
-        data: data,
-      });
+      this.setState({data: data});
+    } else if (prevProps.data !== data) {
+      this.reload();
     } else if (error && prevProps.error !== error) {
       console.log(error);
     }
   }
 
-  reload() {
-    this.props.findAll();
+  reload({sort = 'asc', page = 0} = {}) {
+    this.props.findAll({sort, page});
   }
 
-  onRefresh() {
-    this.reload();
-  }
+  onRefresh = () => {
+    const {params} = this.state;
+    this.setState(
+      {
+        data: [],
+        params: {...params, page: 0},
+      },
+      () => this.reload(this.state.params),
+    );
+  };
+
+  onAdd = () => {
+    this.props.navigation.push('Contact');
+  };
+
+  onShowForm = item => {
+    this.props.navigation.navigate('Contact', item ? {id: item.id} : null);
+  };
+
+  onSearch = () => {
+    const {search, params} = this.state;
+    this.setState(
+      {
+        data: [],
+        params: {...params, search: search, page: 0},
+      },
+      () => this.reload(this.state.params),
+    );
+  };
 
   render() {
     const {loading, navigation} = this.props;
-    const {data} = this.state;
+    const {data, search} = this.state;
 
     return (
-      // <ScrollView>
-      //   <SwipeListView
-      //     refreshControl={
-      //       <RefreshControl refreshing={loading} onRefresh={this.onRefresh} />
-      //     }
-      //     data={data}
-      //     renderItem={({item}) => (
-      //       <Contact onPress={this.onShowForm} contact={item} />
-      //     )}
-      //     rightOpenValue={-75}
-      //     keyExtractor={contact => contact.id.toString()}
-      //   />
-      // </ScrollView>
-
-      <View>
-        <CommonHeader style={navigation} title="Contact" />
-        <Card style={styles.card}>
-          <View style={styles.view}>
-            <Avatar.Image
-              source={{
-                uri:
-                  'https://www.moma.org/d/p/sa/eleey_peter_peterrossphotocrop_3.jpg',
-              }}
-              style={styles.avatar}
-              size={80}
-            />
-
-            <View style={styles.viewName}>
-              <Text style={styles.text}>Peter</Text>
-              <Text style={styles.text}>Martin</Text>
-            </View>
-          </View>
-        </Card>
-      </View>
+      <Container>
+        <CommonHeader navigation={navigation} title="Contacts" />
+        <Item style={styles.search}>
+          <Input
+            style={styles.searchText}
+            value={search}
+            placeholder="Search"
+            onChangeText={search => this.setState({search})}
+          />
+          <Button transparent onPress={this.onSearch}>
+            <Icon style={styles.icon} name="search" />
+          </Button>
+        </Item>
+        <ScrollView>
+          <SwipeListView
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={this.onRefresh} />
+            }
+            data={data.data}
+            renderItem={({item, index}) => (
+              <Contact onPress={this.onShowForm} item={item} index={index} />
+            )}
+            rightOpenValue={-75}
+            keyExtractor={contact => contact.id.toString()}
+          />
+        </ScrollView>
+        <Fab style={styles.add} onPress={this.onAdd}>
+          <Icon name="add" />
+        </Fab>
+      </Container>
     );
   }
 }

@@ -16,12 +16,16 @@ import {put, takeLatest} from 'redux-saga/effects';
 import {commonAxios} from '../utils/Apis';
 
 function* saveContacts(action) {
-  const {id, firstName, lastName, age, photo} = action.data;
-
+  const {id, firstName, lastName, age} = action.data;
+  let photo = action.data.photo;
+  if (photo == '') {
+    photo = 'No Photo';
+  }
   try {
     const data = yield id
       ? commonAxios.put(`contact/${id}`, {firstName, lastName, age, photo})
       : commonAxios.post('contact', {firstName, lastName, age, photo});
+
     yield put({
       type: SAVE_CONTACT_SUCCESS,
       data: data,

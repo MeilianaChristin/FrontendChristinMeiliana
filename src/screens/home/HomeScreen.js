@@ -46,17 +46,12 @@ class HomeScreen extends Component {
                 marginTop: 50,
                 alignSelf: 'center',
                 borderRadius: 20,
-                backgroundColor:'#6c7a89'
+                backgroundColor: '#6c7a89',
               }}
-              onPress={() => navigation.navigate('Contacts')}>
+              onPress={() => navigation.navigate('BottomTab')}>
               <Text style={{marginLeft: 55, fontWeight: 'bold'}}>Show</Text>
             </Button>
           </View>
-          {/* <Image source={image} style={{width:420,height:210,borderBottomRightRadius:100}} >
-            </Image>
-            <Text style = {{color:'white',fontSize: 20,fontWeight:'bold' ,marginLeft:250, marginTop:20}}>
-              Welcome ,
-            </Text> */}
         </Content>
       </Container>
     );

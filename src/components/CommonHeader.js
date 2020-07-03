@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {View, StatusBar} from 'react-native';
 import {Button, Icon, Header, Title, Body, Left} from 'native-base';
+import styles from './style';
 
 class CommonHeader extends Component {
   onBackPress = () => {
@@ -17,13 +18,18 @@ class CommonHeader extends Component {
         </View>
         {!hideLeftButton && (
           <Left>
-            <Button transparent onPress={this.onBackPress}>
-              <Icon name="ios-arrow-back" />
+            <Button
+              style={{width: 55, height: 40, backgroundColor: 'white'}}
+              transparent
+              onPress={this.onBackPress}>
+              <Icon style={styles.icon} name="ios-arrow-back" />
             </Button>
           </Left>
         )}
         <Body>
-          <Title style={{marginLeft: 60}}>{this.props.title}</Title>
+          <Title style={{marginLeft: 50, fontWeight: 'bold'}}>
+            {this.props.title}
+          </Title>
         </Body>
       </Header>
     );
